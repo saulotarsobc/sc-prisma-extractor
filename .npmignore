@@ -1,0 +1,8 @@
+/node_modules
+/src
+/dev
+/prisma
+/.vscode
+.gitignore
+tsconfig.json
+.env

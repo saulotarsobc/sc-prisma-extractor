@@ -28,7 +28,7 @@ export async function extractSchema(
       enums: [...dmmf.datamodel.enums],
     };
   } catch (error) {
-    console.error("Failed to extract schema:", error);
+    console.error("🟥 Failed to extract schema:\n", error);
     throw new Error("Could not process Prisma schema.");
   }
 }

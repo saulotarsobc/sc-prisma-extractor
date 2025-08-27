@@ -8,7 +8,7 @@ async function main() {
 
   if (args.length < 2) {
     console.error(
-      "Usage: sc-prisma-extractor <path-to-schema.prisma> <path-to-output.ts>"
+      "💎 Usage: sc-prisma-extractor <path-to-schema.prisma> <path-to-output.ts>\n"
     );
     process.exit(1);
   }
@@ -33,16 +33,18 @@ async function main() {
       JSON.stringify({ models, enums }, null, 2),
       "utf-8"
     );
-    console.log(`✅ Metadata successfully extracted to ${metadataOutputPath}`);
+    console.log(
+      `✅ Metadata successfully extracted to ${metadataOutputPath}\n`
+    );
 
     // 3. Generate and write TypeScript interfaces
     const tsContent = generateTsInterfaces(models, enums);
     fs.writeFileSync(tsOutputPath, tsContent, "utf-8");
     console.log(
-      `✅ TypeScript interfaces successfully generated at ${tsOutputPath}`
+      `✅ TypeScript interfaces successfully generated at ${tsOutputPath}\n`
     );
   } catch (error) {
-    console.error("An error occurred:", error);
+    console.error("🟥 An error occurred:\n", error);
     process.exit(1);
   }
 }
