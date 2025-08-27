@@ -2,7 +2,10 @@
   "name": "sc-prisma-extractor",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "bin": {
+    "sc-prisma-extractor": "dist/index.js"
+  },
   "scripts": {
     "build": "tsc",
     "dev": "ts-node src/index.ts"
