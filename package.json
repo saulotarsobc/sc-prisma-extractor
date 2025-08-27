@@ -1,20 +1,39 @@
 {
   "name": "sc-prisma-extractor",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.0.0",
+  "description": "A CLI tool to extract your Prisma schema into usable TypeScript interfaces and a detailed metadata JSON file.",
   "main": "dist/index.js",
   "bin": {
     "sc-prisma-extractor": "dist/index.js"
   },
   "scripts": {
-    "build": "tsc",
-    "dev": "ts-node src/index.ts"
+    "clean": "rimraf ./dist",
+    "build": "npm run clean && tsc",
+    "dev": "ts-node src/index.ts",
+    "prepublishOnly": "npm run build"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "prisma",
+    "generator",
+    "typescript",
+    "interface",
+    "cli",
+    "schema",
+    "extractor"
+  ],
+  "author": "saulotarsobc",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/saulotarsobc/sc-prisma-extractor.git"
+  },
+  "bugs": {
+    "url": "https://github.com/saulotarsobc/sc-prisma-extractor/issues"
+  },
+  "homepage": "https://github.com/saulotarsobc/sc-prisma-extractor#readme",
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^24.3.0",
+    "rimraf": "^6.0.1",
     "typescript": "^5.9.2"
   },
   "dependencies": {
