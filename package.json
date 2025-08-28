@@ -9,7 +9,8 @@
   "scripts": {
     "clean": "rimraf ./dist",
     "build": "npm run clean && tsc",
-    "dev": "ts-node src/index.ts ./prisma/schema.prisma ./dev/extracted.ts",
+    "dev": "sc-prisma-extractor ./prisma/schema.prisma ./dev/extracted.ts",
+    "start": "node ./dist/index.js ./prisma/schema.prisma ./dev/extracted.ts",
     "prepublishOnly": "npm run build",
     "deploy": "npm run build && npm version patch && npm publish"
   },
