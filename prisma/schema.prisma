@@ -8,276 +8,72 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Migration {
-  id        Int    @id @default(autoincrement())
-  timestamp BigInt
-  name      String @db.VarChar(255)
-
-  @@map("migrations")
-}
-
-model Group {
-  id          Int      @id @default(autoincrement()) @db.UnsignedInt
-  name        String   @unique(map: "UQ_group_name") @db.VarChar(100)
-  active      Boolean  @default(true)
-  permissions String   @db.LongText
-  description String?  @db.VarChar(100)
-  created_at  DateTime @default(now()) @db.Timestamp(0)
-  updated_at  DateTime @default(now()) @db.Timestamp(0)
-  users       User[]
-
-  @@map("groups")
+enum Role {
+  USER
+  ADMIN
 }
 
 model User {
-  id          Int        @id @default(autoincrement()) @db.UnsignedInt
-  name        String     @db.VarChar(100)
-  email       String     @unique(map: "UQ_user_email") @db.VarChar(100)
-  password    String     @db.Text
-  group_id    Int        @db.UnsignedInt
-  phone       String?    @db.VarChar(30)
-  avatar      String?    @db.Text
-  is_active   Boolean    @default(true)
-  created_at  DateTime   @default(now()) @db.Timestamp(0)
-  updated_at  DateTime   @default(now()) @db.Timestamp(0)
-  notes_leads NoteLead[]
-  group       Group      @relation(fields: [group_id], references: [id], onDelete: Cascade, map: "FK_user_group")
+  id          String        @id @default(cuid())
+  email       String        @unique
+  name        String?
+  role        Role          @default(USER)
+  posts       Post[]
+  created_at  DateTime      @default(now())
+  updated_at  DateTime      @updatedAt
+  LikePost    LikePost[]
+  LikeComment LikeComment[]
 
-  @@index([email], map: "IDX_user_email")
-  @@index([name], map: "IDX_user_name")
-  @@index([group_id], map: "FK_user_group")
   @@map("users")
 }
 
-model Tracker {
-  id                 Int        @id @default(autoincrement()) @db.UnsignedInt
-  name               String     @db.VarChar(30)
-  model              String     @db.VarChar(30)
-  description        String?    @db.Text
-  created_at         DateTime   @default(now()) @db.Timestamp(0)
-  updated_at         DateTime   @default(now()) @db.Timestamp(0)
-  contract_tracker_1 Contract[] @relation("contracts_tracker_1_idTocontracts")
-  contract_tracker_2 Contract[] @relation("contracts_tracker_2_idTocontracts")
+model Post {
+  id         String     @id @default(cuid())
+  title      String
+  content    String?
+  published  Boolean    @default(false)
+  author     User       @relation(fields: [author_id], references: [id], onDelete: Restrict)
+  author_id  String
+  created_at DateTime   @default(now())
+  updated_at DateTime   @updatedAt
+  Comment    Comment[]
+  LikePost   LikePost[]
 
-  @@map("trackers")
+  @@map("posts")
 }
 
-model Contract {
-  id              Int                @id @default(autoincrement()) @db.UnsignedInt
-  status          ContractStatusEnum @default(A)
-  description     String?            @db.VarChar(255)
-  start_date      DateTime           @db.DateTime(0)
-  end_date        DateTime           @db.DateTime(0)
-  due_day         Int
-  value           Float              @db.Float
-  final_value     Float              @db.Float
-  tracker_1_id    Int?               @db.UnsignedInt
-  tracker_2_id    Int?               @db.UnsignedInt
-  tracker_1_value Float?             @db.Float
-  tracker_2_value Float?             @db.Float
-  quantity_chip   Int?               @db.UnsignedInt
-  value_per_chip  Int?
-  data_limit      Int?               @db.UnsignedInt
-  disabled_date   DateTime?          @db.DateTime(0)
-  deleted_date    DateTime?          @db.Timestamp(0)
-  register_id     Int                @db.UnsignedInt
-  created_at      DateTime           @default(now()) @db.Timestamp(0)
-  updated_at      DateTime           @default(now()) @db.Timestamp(0)
-  sms_token       String?            @db.Text
-  sms_amount      Int                @default(0)
-  register        Register           @relation(fields: [register_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "FK_contracts_register")
-  tracker_1       Tracker?           @relation("contracts_tracker_1_idTocontracts", fields: [tracker_1_id], references: [id], onUpdate: Restrict, map: "FK_contracts_tracker_1")
-  tracker_2       Tracker?           @relation("contracts_tracker_2_idTocontracts", fields: [tracker_2_id], references: [id], onUpdate: Restrict, map: "FK_contracts_tracker_2")
-  contracts_files ContractsFile[]
-  servers         Server[]
+model Comment {
+  id          String        @id @default(cuid())
+  content     String
+  post        Post          @relation(fields: [post_id], references: [id], onDelete: Restrict)
+  post_id     String
+  created_at  DateTime      @default(now())
+  updated_at  DateTime      @updatedAt
+  LikeComment LikeComment[]
 
-  @@index([register_id], map: "FK_contracts_register")
-  @@index([tracker_1_id], map: "FK_contracts_tracker_1")
-  @@index([tracker_2_id], map: "FK_contracts_tracker_2")
-  @@map("contracts")
+  @@map("comments")
 }
 
-model ContractsFile {
-  file_id     Int      @db.UnsignedInt
-  contract_id Int      @db.UnsignedInt
-  created_at  DateTime @default(now()) @db.Timestamp(0)
-  updated_at  DateTime @default(now()) @db.Timestamp(0)
-  contract    Contract @relation(fields: [contract_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "FK_contracts_files_contract_id")
-  file        File     @relation(fields: [file_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "FK_contracts_files_file_id")
+model LikeComment {
+  id         String   @id @default(cuid())
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Restrict)
+  user_id    String
+  comment    Comment  @relation(fields: [comment_id], references: [id], onDelete: Restrict)
+  comment_id String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
-  @@id([file_id, contract_id])
-  @@index([contract_id], map: "FK_contracts_files_contract_id")
-  @@map("contracts_files")
+  @@map("like_comments")
 }
 
-model File {
-  id              Int             @id @default(autoincrement()) @db.UnsignedInt
-  name            String          @db.VarChar(255)
-  created_at      DateTime        @default(now()) @db.Timestamp(0)
-  updated_at      DateTime        @default(now()) @db.Timestamp(0)
-  url             String          @db.Text
-  contracts_files ContractsFile[]
+model LikePost {
+  id         String   @id @default(cuid())
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Restrict)
+  user_id    String
+  post       Post     @relation(fields: [post_id], references: [id], onDelete: Restrict)
+  post_id    String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
-  @@map("files")
-}
-
-model Server {
-  id                 Int               @id @default(autoincrement()) @db.UnsignedInt
-  name               String            @db.VarChar(255)
-  description        String?           @db.VarChar(255)
-  is_active          Boolean           @default(true)
-  contract_id        Int               @db.UnsignedInt
-  address            String            @db.VarChar(100)
-  port               Int               @db.UnsignedInt
-  username           String            @db.VarChar(30)
-  password           String            @db.VarChar(100)
-  monitoring_enabled Boolean           @default(false)
-  monitoring_token   String?           @db.Text
-  status             ServerStatusEnum?
-  last_check         DateTime?         @db.Timestamp(0)
-  uptime             String?           @db.VarChar(25)
-  cpu                Int?              @db.UnsignedInt
-  memory             Int?              @db.UnsignedInt
-  storage            Int?              @db.UnsignedInt
-  created_at         DateTime          @default(now()) @db.Timestamp(0)
-  updated_at         DateTime          @default(now()) @db.Timestamp(0)
-  agent_version      String?           @db.VarChar(20)
-  zumee_version      String?           @db.VarChar(20)
-  serial             String?           @unique(map: "IDX_servers_serial") @db.VarChar(255)
-  serial_active      Boolean           @default(false)
-  contract           Contract          @relation(fields: [contract_id], references: [id], onDelete: Cascade, map: "FK_servers_contracts")
-
-  @@index([contract_id], map: "FK_servers_contracts")
-  @@map("servers")
-}
-
-model Register {
-  id                 Int                 @id @default(autoincrement()) @db.UnsignedInt
-  cnpj               String              @unique(map: "UQ_register_cnpj") @db.VarChar(14)
-  email              String              @unique(map: "UQ_register_email") @db.VarChar(60)
-  password           String              @db.Text
-  company_name       String              @db.VarChar(100)
-  fantasy_name       String              @db.VarChar(100)
-  avatar             String?             @db.Text
-  status             RegistersStatusEnum @default(P)
-  email_2            String              @db.VarChar(60)
-  phone_1            String              @db.VarChar(30)
-  phone_2            String              @db.VarChar(30)
-  state_registration String?             @db.VarChar(30)
-  address            String              @db.VarChar(100)
-  number             String?             @db.VarChar(30)
-  complement         String              @db.Text
-  district           String              @db.VarChar(100)
-  zip_code           String              @db.VarChar(15)
-  city               String              @db.VarChar(100)
-  state              String              @db.VarChar(30)
-  country            String?             @db.VarChar(30)
-  deleted_date       DateTime?           @db.Timestamp(0)
-  disabled_date      DateTime?           @db.Timestamp(0)
-  created_at         DateTime            @default(now()) @db.Timestamp(0)
-  updated_at         DateTime            @default(now()) @db.Timestamp(0)
-  contracts          Contract[]
-
-  @@map("registers")
-}
-
-model Lead {
-  id             Int              @id @default(autoincrement()) @db.UnsignedInt
-  business       String           @db.VarChar(255)
-  customers      Int?             @db.UnsignedInt
-  erp            String?          @db.VarChar(255)
-  contact        String?          @db.VarChar(255)
-  position       String?          @db.VarChar(255)
-  phone          String?          @db.VarChar(255)
-  state          String?          @db.VarChar(255)
-  city           String?          @db.VarChar(255)
-  country        String?          @db.VarChar(255)
-  gender         LeadsGenderEnum? @default(U)
-  type           LeadsTypeEnum?   @default(L)
-  status         Int?             @db.UnsignedInt
-  contact_date   DateTime?        @db.Timestamp(0)
-  created_at     DateTime         @default(now()) @db.Timestamp(0)
-  updated_at     DateTime         @default(now()) @db.Timestamp(0)
-  channels_leads ChannelsLead[]
-  notes_leads    NoteLead[]
-
-  @@map("leads")
-}
-
-model Note {
-  id          Int        @id @default(autoincrement()) @db.UnsignedInt
-  content     String     @db.Text
-  created_at  DateTime   @default(now()) @db.Timestamp(0)
-  updated_at  DateTime   @default(now()) @db.Timestamp(0)
-  notes_leads NoteLead[]
-
-  @@map("notes")
-}
-
-model Channel {
-  id             Int            @id @default(autoincrement()) @db.UnsignedInt
-  name           String         @unique(map: "UQ_channels_name") @db.VarChar(50)
-  description    String?        @db.VarChar(100)
-  created_at     DateTime       @default(now()) @db.Timestamp(0)
-  updated_at     DateTime       @default(now()) @db.Timestamp(0)
-  channels_leads ChannelsLead[]
-
-  @@map("channels")
-}
-
-model ChannelsLead {
-  channel_id Int     @db.UnsignedInt
-  lead_id    Int     @db.UnsignedInt
-  channel    Channel @relation(fields: [channel_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "FK_channels_leads_channel_id")
-  lead       Lead    @relation(fields: [lead_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "FK_channels_leads_lead_id")
-
-  @@id([channel_id, lead_id])
-  @@index([lead_id], map: "FK_channels_leads_lead_id")
-  @@map("channels_leads")
-}
-
-model NoteLead {
-  id      Int  @default(autoincrement()) @db.UnsignedInt
-  lead_id Int  @db.UnsignedInt
-  note_id Int  @db.UnsignedInt
-  user_id Int  @db.UnsignedInt
-  lead    Lead @relation(fields: [lead_id], references: [id], onDelete: Cascade, map: "FK_notes_leads_lead_id")
-  note    Note @relation(fields: [note_id], references: [id], onDelete: Cascade, map: "FK_notes_leads_note_id")
-  user    User @relation(fields: [user_id], references: [id], map: "FK_notes_leads_user_id")
-
-  @@id([id, lead_id, note_id, user_id])
-  @@index([lead_id], map: "FK_notes_leads_lead_id")
-  @@index([note_id], map: "FK_notes_leads_note_id")
-  @@index([user_id], map: "FK_notes_leads_user_id")
-  @@map("notes_leads")
-}
-
-enum ContractStatusEnum {
-  A
-  I
-}
-
-enum ServerStatusEnum {
-  online
-  offline
-  maintenance
-}
-
-enum RegistersStatusEnum {
-  A
-  I
-  P
-}
-
-enum LeadsGenderEnum {
-  M
-  F
-  U
-}
-
-enum LeadsTypeEnum {
-  L
-  P
-  C
-  R
+  @@map("likes_posts")
 }
