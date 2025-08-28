@@ -14,15 +14,15 @@ enum Role {
 }
 
 model User {
-  id          String        @id @default(cuid())
-  email       String        @unique
-  name        String?
-  role        Role          @default(USER)
-  posts       Post[]
-  created_at  DateTime      @default(now())
-  updated_at  DateTime      @updatedAt
-  LikePost    LikePost[]
-  LikeComment LikeComment[]
+  id            String        @id @default(cuid())
+  email         String        @unique
+  name          String?
+  role          Role          @default(USER)
+  posts         Post[]
+  created_at    DateTime      @default(now())
+  updated_at    DateTime      @updatedAt
+  like_posts    LikePost[]
+  like_comments LikeComment[]
 
   @@map("users")
 }
@@ -36,20 +36,20 @@ model Post {
   author_id  String
   created_at DateTime   @default(now())
   updated_at DateTime   @updatedAt
-  Comment    Comment[]
-  LikePost   LikePost[]
+  comments   Comment[]
+  like_posts LikePost[]
 
   @@map("posts")
 }
 
 model Comment {
-  id          String        @id @default(cuid())
-  content     String
-  post        Post          @relation(fields: [post_id], references: [id], onDelete: Restrict)
-  post_id     String
-  created_at  DateTime      @default(now())
-  updated_at  DateTime      @updatedAt
-  LikeComment LikeComment[]
+  id            String        @id @default(cuid())
+  content       String
+  post          Post          @relation(fields: [post_id], references: [id], onDelete: Restrict)
+  post_id       String
+  created_at    DateTime      @default(now())
+  updated_at    DateTime      @updatedAt
+  like_comments LikeComment[]
 
   @@map("comments")
 }
@@ -75,5 +75,5 @@ model LikePost {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  @@map("likes_posts")
+  @@map("like_posts")
 }
