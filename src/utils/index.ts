@@ -1,7 +1,7 @@
 import type { DMMF } from "@prisma/generator-helper";
 import { getDMMF } from "@prisma/internals";
-import * as fs from "fs";
-import * as path from "path";
+import { existsSync, readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { SchemaInformation } from "../interfaces";
 
 /**
@@ -15,12 +15,12 @@ export async function extractSchema(
   schemaPath: string
 ): Promise<SchemaInformation> {
   try {
-    const resolvedPath = path.resolve(schemaPath);
-    if (!fs.existsSync(resolvedPath)) {
+    const resolvedPath = resolve(schemaPath);
+    if (!existsSync(resolvedPath)) {
       throw new Error(`Schema file not found at: ${resolvedPath}`);
     }
 
-    const schema = fs.readFileSync(resolvedPath, "utf-8");
+    const schema = readFileSync(resolvedPath, "utf-8");
     const dmmf = await getDMMF({ datamodel: schema });
 
     return {
@@ -47,9 +47,13 @@ function mapPrismaTypeToTsType(prismaType: string): string {
     case "DateTime":
       return "Date";
     case "Json":
-      return "any"; // Or a more specific type
+      return "string";
+    case "Decimal":
+      return "number";
+    case "Bytes":
+      return "Buffer";
     default:
-      return prismaType; // For enums and custom types
+      return prismaType;
   }
 }
 

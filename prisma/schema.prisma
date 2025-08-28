@@ -13,14 +13,48 @@ enum Role {
   ADMIN
 }
 
+/**
+ * Example model
+ * Just an example model for demonstration types mapping
+ * export interface Example {
+ * ...... id: string;
+ * ...... BigInt: bigint;
+ * ...... Boolean: boolean;
+ * ...... Bytes: Buffer;
+ * ...... DateTime: Date;
+ * ...... Decimal: number;
+ * ...... Float: number;
+ * ...... Int: number;
+ * ...... Json: string;
+ * ...... String: string;
+ * }
+ */
+
+model Example {
+  id       String   @id @default(cuid())
+  BigInt   BigInt
+  Boolean  Boolean
+  Bytes    Bytes
+  DateTime DateTime
+  Decimal  Decimal
+  Float    Float
+  Int      Int
+  Json     Json
+  String   String
+
+  @@map("examples")
+}
+
 model User {
-  id            String        @id @default(cuid())
-  email         String        @unique
-  name          String?
-  role          Role          @default(USER)
+  id         String   @id @default(cuid())
+  email      String   @unique
+  name       String?
+  role       Role     @default(USER)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
   posts         Post[]
-  created_at    DateTime      @default(now())
-  updated_at    DateTime      @updatedAt
+  comments      Comment[]
   like_posts    LikePost[]
   like_comments LikeComment[]
 
@@ -28,14 +62,16 @@ model User {
 }
 
 model Post {
-  id         String     @id @default(cuid())
+  id         String   @id @default(cuid())
   title      String
   content    String?
-  published  Boolean    @default(false)
-  author     User       @relation(fields: [author_id], references: [id], onDelete: Restrict)
+  published  Boolean  @default(false)
   author_id  String
-  created_at DateTime   @default(now())
-  updated_at DateTime   @updatedAt
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  user User @relation(fields: [author_id], references: [id], onDelete: Restrict)
+
   comments   Comment[]
   like_posts LikePost[]
 
@@ -43,12 +79,15 @@ model Post {
 }
 
 model Comment {
-  id            String        @id @default(cuid())
-  content       String
+  id         String   @id @default(cuid())
+  content    String
+  user_id    String
+  post_id    String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  user          User          @relation(fields: [user_id], references: [id])
   post          Post          @relation(fields: [post_id], references: [id], onDelete: Restrict)
-  post_id       String
-  created_at    DateTime      @default(now())
-  updated_at    DateTime      @updatedAt
   like_comments LikeComment[]
 
   @@map("comments")
@@ -56,24 +95,26 @@ model Comment {
 
 model LikeComment {
   id         String   @id @default(cuid())
-  user       User     @relation(fields: [user_id], references: [id], onDelete: Restrict)
   user_id    String
-  comment    Comment  @relation(fields: [comment_id], references: [id], onDelete: Restrict)
   comment_id String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+
+  user    User    @relation(fields: [user_id], references: [id], onDelete: Restrict)
+  comment Comment @relation(fields: [comment_id], references: [id], onDelete: Restrict)
 
   @@map("like_comments")
 }
 
 model LikePost {
   id         String   @id @default(cuid())
-  user       User     @relation(fields: [user_id], references: [id], onDelete: Restrict)
   user_id    String
-  post       Post     @relation(fields: [post_id], references: [id], onDelete: Restrict)
   post_id    String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Restrict)
+  post Post @relation(fields: [post_id], references: [id], onDelete: Restrict)
 
   @@map("like_posts")
 }
