@@ -93,15 +93,21 @@ program
       const { models, enums } = await extractSchema(finalSchemaPath);
       spinner.succeed("Schema metadata extracted.");
 
-      spinner.start("Writing metadata.json...");
-      fs.writeFileSync(
-        metadataOutputPath,
-        JSON.stringify({ models, enums }, null, 2),
-        "utf-8"
-      );
-      spinner.succeed(
-        `Metadata successfully extracted to ${metadataOutputPath}`
-      );
+      if (config.generateMetadata) {
+        spinner.start("Writing metadata.json...");
+        fs.writeFileSync(
+          metadataOutputPath,
+          JSON.stringify({ models, enums }, null, 2),
+          "utf-8"
+        );
+        spinner.succeed(
+          `Metadata successfully extracted to ${metadataOutputPath}`
+        );
+      } else {
+        spinner.succeed(
+          "Schema metadata extracted (metadata generation disabled)."
+        );
+      }
 
       spinner.start("Generating TypeScript interfaces...");
       const tsContent = generateTsInterfaces(models, enums, options.config);
@@ -140,15 +146,21 @@ if (process.argv.length === 2) {
         const { models, enums } = await extractSchema(config.prismaSchema);
         spinner.succeed("Schema metadata extracted.");
 
-        spinner.start("Writing metadata.json...");
-        fs.writeFileSync(
-          metadataOutputPath,
-          JSON.stringify({ models, enums }, null, 2),
-          "utf-8"
-        );
-        spinner.succeed(
-          `Metadata successfully extracted to ${metadataOutputPath}`
-        );
+        if (config.generateMetadata) {
+          spinner.start("Writing metadata.json...");
+          fs.writeFileSync(
+            metadataOutputPath,
+            JSON.stringify({ models, enums }, null, 2),
+            "utf-8"
+          );
+          spinner.succeed(
+            `Metadata successfully extracted to ${metadataOutputPath}`
+          );
+        } else {
+          spinner.succeed(
+            "Schema metadata extracted (metadata generation disabled)."
+          );
+        }
 
         spinner.start("Generating TypeScript interfaces...");
         const tsContent = generateTsInterfaces(models, enums);

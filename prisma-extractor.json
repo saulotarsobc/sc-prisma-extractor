@@ -3,6 +3,7 @@
   "outputType": "interface",
   "outputFile": "./src/interfaces/database.ts",
   "prismaSchema": "./prisma/schema.prisma",
+  "generateMetadata": false,
   "mapTypes": {
     "String": "string",
     "Int": "number",
