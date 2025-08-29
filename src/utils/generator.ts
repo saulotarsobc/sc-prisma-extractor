@@ -49,11 +49,17 @@ export function generateTsInterfaces(
     model.fields.forEach((field: DMMF.Field) => {
       const tsType = mapPrismaTypeToTsType(field.type, config);
       const isRelation = field.kind === "object"; // relation fields
+      // Prisma DMMF exposes hasDefaultValue for scalar defaults (including autoincrement, now(), @updatedAt, enums with default)
+      const hasDefault: boolean =
+        typeof (field as any).hasDefaultValue === "boolean"
+          ? (field as any).hasDefaultValue
+          : false;
       const isIdField: boolean =
         typeof (field as any).isId === "boolean" ? (field as any).isId : false;
       const isOptional =
         !field.isRequired ||
         (config.relationFieldsOptional && isRelation) ||
+        (field.isRequired && hasDefault && !isIdField) || // Campos obrigatórios com default são opcionais
         (!isIdField && false); // Campos @id nunca são opcionais
       const isList = field.isList;
       let fieldType = tsType;
