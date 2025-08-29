@@ -137,6 +137,12 @@
       "default": true,
       "type": "boolean",
       "title": "relationFieldsOptional"
+    },
+    "defaultFieldsOptional": {
+      "description": "Marks scalar fields with default values as optional in generated types (e.g., id autoincrement/cuid, created_at now(), updatedAt).",
+      "default": true,
+      "type": "boolean",
+      "title": "defaultFieldsOptional"
     }
   },
   "defaultProperties": [],

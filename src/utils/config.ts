@@ -18,6 +18,11 @@ export interface PrismaExtractorConfig {
    * so you are not forced to send nested relation objects/arrays.
    */
   relationFieldsOptional?: boolean;
+  /**
+   * When true, any non-relation field that has a default value (including enums and scalars)
+   * will be optional in the generated types (e.g., id with autoincrement/cuid, created_at: now(), updatedAt).
+   */
+  defaultFieldsOptional?: boolean;
   mapTypes: Record<string, string>;
 }
 
@@ -72,6 +77,7 @@ export function validateConfig(
     "generateMetadata",
     "$schema",
     "relationFieldsOptional",
+    "defaultFieldsOptional",
   ];
   for (const key in config) {
     if (!allowedKeys.includes(key)) {
@@ -85,6 +91,14 @@ export function validateConfig(
     typeof config.relationFieldsOptional !== "boolean"
   ) {
     errors.push("relationFieldsOptional must be a boolean if provided.");
+  }
+
+  // Validate defaultFieldsOptional when present
+  if (
+    Object.prototype.hasOwnProperty.call(config, "defaultFieldsOptional") &&
+    typeof config.defaultFieldsOptional !== "boolean"
+  ) {
+    errors.push("defaultFieldsOptional must be a boolean if provided.");
   }
 
   if (errors.length > 0) {
@@ -133,6 +147,7 @@ export function loadConfig(configPath?: string): PrismaExtractorConfig {
         prismaSchema: userConfig.prismaSchema || "./prisma/schema.prisma",
         generateMetadata: userConfig.generateMetadata ?? false,
         relationFieldsOptional: userConfig.relationFieldsOptional ?? true,
+        defaultFieldsOptional: userConfig.defaultFieldsOptional ?? true,
         mapTypes: {
           ...DEFAULT_TYPE_MAPPINGS,
           ...userConfig.mapTypes,
@@ -154,6 +169,7 @@ export function loadConfig(configPath?: string): PrismaExtractorConfig {
     prismaSchema: "./prisma/schema.prisma",
     generateMetadata: false,
     relationFieldsOptional: true,
+    defaultFieldsOptional: true,
     mapTypes: DEFAULT_TYPE_MAPPINGS,
   };
 }
@@ -172,6 +188,7 @@ export function generateConfigFile(configPath?: string): void {
     prismaSchema: "./prisma/schema.prisma",
     generateMetadata: false,
     relationFieldsOptional: true,
+    defaultFieldsOptional: true,
     mapTypes: DEFAULT_TYPE_MAPPINGS,
   };
 
