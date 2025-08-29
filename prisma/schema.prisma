@@ -13,39 +13,6 @@ enum Role {
   ADMIN
 }
 
-/**
- * Example model
- * Just an example model for demonstration types mapping
- * export interface Example {
- * ...... id: string;
- * ...... BigInt: bigint;
- * ...... Boolean: boolean;
- * ...... Bytes: Buffer;
- * ...... DateTime: Date;
- * ...... Decimal: number;
- * ...... Float: number;
- * ...... Int: number;
- * ...... Json: string;
- * ...... String: string;
- * }
- */
-
-// model Example {
-//   id          String                                     @id @default(cuid())
-//   BigInt      BigInt
-//   Boolean     Boolean
-//   Bytes       Bytes
-//   DateTime    DateTime
-//   Decimal     Decimal
-//   Float       Float
-//   Int         Int
-//   Json        Json
-//   String      String
-//   Unsupported Unsupported("This is an unsupported type") // Custom unsupported type for testing
-
-//   @@map("examples")
-// }
-
 model User {
   id         String   @id @default(cuid())
   username   String

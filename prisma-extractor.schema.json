@@ -131,6 +131,12 @@
       "default": false,
       "type": "boolean",
       "title": "generateMetadata"
+    },
+    "relationFieldsOptional": {
+      "description": "Marks relation fields (kind 'object', including lists) as optional in generated types.",
+      "default": true,
+      "type": "boolean",
+      "title": "relationFieldsOptional"
     }
   },
   "defaultProperties": [],

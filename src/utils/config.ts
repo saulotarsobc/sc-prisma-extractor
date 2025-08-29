@@ -12,6 +12,12 @@ export interface PrismaExtractorConfig {
   outputFile: string;
   prismaSchema: string;
   generateMetadata: boolean;
+  /**
+   * When true, relation fields (kind: "object") will be marked as optional in the generated types.
+   * This helps when using the types to type request bodies for create/update operations,
+   * so you are not forced to send nested relation objects/arrays.
+   */
+  relationFieldsOptional?: boolean;
   mapTypes: Record<string, string>;
 }
 
@@ -65,11 +71,20 @@ export function validateConfig(
     "prismaSchema",
     "generateMetadata",
     "$schema",
+    "relationFieldsOptional",
   ];
   for (const key in config) {
     if (!allowedKeys.includes(key)) {
       errors.push(`Unexpected property: ${key}.`);
     }
+  }
+
+  // Validate relationFieldsOptional when present
+  if (
+    Object.prototype.hasOwnProperty.call(config, "relationFieldsOptional") &&
+    typeof config.relationFieldsOptional !== "boolean"
+  ) {
+    errors.push("relationFieldsOptional must be a boolean if provided.");
   }
 
   if (errors.length > 0) {
@@ -117,6 +132,7 @@ export function loadConfig(configPath?: string): PrismaExtractorConfig {
         outputFile: userConfig.outputFile || "./src/interfaces/database.ts",
         prismaSchema: userConfig.prismaSchema || "./prisma/schema.prisma",
         generateMetadata: userConfig.generateMetadata ?? false,
+  relationFieldsOptional: userConfig.relationFieldsOptional ?? true,
         mapTypes: {
           ...DEFAULT_TYPE_MAPPINGS,
           ...userConfig.mapTypes,
@@ -137,6 +153,7 @@ export function loadConfig(configPath?: string): PrismaExtractorConfig {
     outputFile: "./src/interfaces/database.ts",
     prismaSchema: "./prisma/schema.prisma",
     generateMetadata: false,
+  relationFieldsOptional: true,
     mapTypes: DEFAULT_TYPE_MAPPINGS,
   };
 }
@@ -154,6 +171,7 @@ export function generateConfigFile(configPath?: string): void {
     outputFile: "./src/interfaces/database.ts",
     prismaSchema: "./prisma/schema.prisma",
     generateMetadata: false,
+  relationFieldsOptional: true,
     mapTypes: DEFAULT_TYPE_MAPPINGS,
   };
 

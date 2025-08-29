@@ -48,7 +48,9 @@ export function generateTsInterfaces(
 `;
     model.fields.forEach((field: DMMF.Field) => {
       const tsType = mapPrismaTypeToTsType(field.type, config);
-      const isOptional = !field.isRequired;
+      const isRelation = field.kind === "object"; // relation fields
+      const isOptional =
+        !field.isRequired || (config.relationFieldsOptional && isRelation);
       const isList = field.isList;
       content += `  ${field.name}${isOptional ? "?" : ""}: ${tsType}`; // Corrected: escaped double quotes within template literal
       if (isList) {
