@@ -63,6 +63,7 @@ export function generateTsInterfaces(
         (config.relationFieldsOptional && isRelation) ||
         (config.defaultFieldsOptional &&
           !isRelation &&
+          field.kind !== "enum" &&
           (hasDefault || isUpdatedAt));
       const isList = field.isList;
       content += `  ${field.name}${isOptional ? "?" : ""}: ${tsType}`; // Corrected: escaped double quotes within template literal
