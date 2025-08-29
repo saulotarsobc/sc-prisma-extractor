@@ -7,7 +7,7 @@
     "sc-prisma-extractor": "dist/index.js"
   },
   "scripts": {
-    "dev": "nodemon --watch src --watch prisma --ext ts,prisma --exec \"npm run build && npm run start\"",
+    "dev": "nodemon --watch src --watch prisma --watch prisma-extractor.json --ext ts,prisma --exec \"npm run build && npm run start\"",
     "build": "tsc",
     "start": "node dist/index.js ./prisma/schema.prisma ./dev/database.ts",
     "validate-config": "node -e \"const { validateConfig, loadConfig } = require('./dist/utils'); try { validateConfig(loadConfig()); console.log('✅ Configuração válida!'); } catch (error) { console.error('🟥', error.message); process.exit(1); }\"",
@@ -37,8 +37,8 @@
   "homepage": "https://github.com/saulotarsobc/sc-prisma-extractor#readme",
   "license": "ISC",
   "dependencies": {
-    "@prisma/generator-helper": "^6.14.0",
-    "@prisma/internals": "^6.14.0",
+    "@prisma/generator-helper": "^6.15.0",
+    "@prisma/internals": "^6.15.0",
     "commander": "^14.0.0",
     "ora": "^8.2.0"
   },

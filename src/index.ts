@@ -11,6 +11,69 @@ import {
   loadConfig,
 } from "./utils";
 
+/**
+ * Main function to run the extraction and generation process.
+ */
+async function runExtractor(options: {
+  schemaPath?: string;
+  tsOutputPath?: string;
+  configPath?: string;
+}) {
+  const spinner = ora("Starting...").start();
+  try {
+    // 1. Load Config
+    spinner.text = "Loading configuration";
+    const config = loadConfig(options.configPath);
+    const finalSchemaPath = options.schemaPath || config.prismaSchema;
+    const finalTsOutputPath = options.tsOutputPath || config.outputFile;
+
+    if (!finalSchemaPath || !finalTsOutputPath) {
+      spinner.fail("Configuration validation failed");
+      throw new Error(
+        "Schema path and output path must be provided either as arguments or in the config file."
+      );
+    }
+    spinner.succeed("Configuration loaded.");
+
+    // 2. Ensure output directory exists
+    spinner.start("Preparing output directory...");
+    const outputDir = path.dirname(finalTsOutputPath);
+    if (!fs.existsSync(outputDir)) {
+      fs.mkdirSync(outputDir, { recursive: true });
+    }
+    spinner.succeed("Output directory is ready.");
+
+    // 3. Extract Schema
+    spinner.start("Processing Prisma schema...");
+    const { models, enums } = await extractSchema(finalSchemaPath);
+    spinner.succeed("Prisma schema processed.");
+
+    // 4. Write Metadata (if enabled)
+    if (config.generateMetadata) {
+      spinner.start("Writing metadata.json...");
+      const metadataOutputPath = path.join(outputDir, "metadata.json");
+      fs.writeFileSync(
+        metadataOutputPath,
+        JSON.stringify({ models, enums }, null, 2),
+        "utf-8"
+      );
+      spinner.succeed(`Metadata successfully written to ${metadataOutputPath}`);
+    }
+
+    // 5. Generate TS Content
+    spinner.start("Generating TypeScript interfaces...");
+    const tsContent = generateTsInterfaces(models, enums, config);
+    fs.writeFileSync(finalTsOutputPath, tsContent, "utf-8");
+    spinner.succeed(
+      `TypeScript interfaces successfully generated at ${finalTsOutputPath}`
+    );
+  } catch (error) {
+    spinner.fail("An error occurred");
+    console.error(error instanceof Error ? `🟥 ${error.message}` : error);
+    process.exit(1);
+  }
+}
+
 const program = new Command();
 
 program
@@ -37,148 +100,31 @@ program
   )
   .showHelpAfterError()
   .action(async (schemaPath, tsOutputPath, options) => {
+    if (!options.init) {
+      console.log(`>>> SC Prisma Extractor - Version: ${version} <<<
+`);
+    }
+
     // Handle --init flag
     if (options.init) {
-      console.log(`>>> SC Prisma Extractor - Version: ${version} <<<\n`);
       const spinner = ora("Generating configuration file...").start();
-
       try {
         generateConfigFile(options.config);
         spinner.succeed("Configuration file generated successfully!");
-        return;
       } catch (error) {
         spinner.fail("Failed to generate configuration file");
         console.error(error);
         process.exit(1);
       }
+      return;
     }
 
-    // Check if required arguments are provided
-    if (!schemaPath && !tsOutputPath) {
-      // Try to load config to see if we have defaults
-      try {
-        const config = loadConfig(options.config);
-        if (!config.prismaSchema || !config.outputFile) {
-          throw new Error("Missing required paths in config");
-        }
-        // If we have config values, we can proceed without arguments
-      } catch (error) {
-        console.error(
-          "🟥 Error: Both schema-path and ts-output-path are required, or configure them in prisma-extractor.json"
-        );
-        program.help();
-        process.exit(1);
-      }
-    }
-
-    console.log(`>>> SC Prisma Extractor - Version: ${version} <<<\n`);
-
-    const spinner = ora("Starting schema extraction...").start();
-
-    // Load config to get default paths
-    const config = loadConfig(options.config);
-    const finalSchemaPath = schemaPath || config.prismaSchema;
-    const finalTsOutputPath = tsOutputPath || config.outputFile;
-
-    const outputDir = path.dirname(finalTsOutputPath);
-    const metadataOutputPath = path.join(outputDir, "metadata.json");
-
-    try {
-      spinner.text = "Ensuring output directory exists...";
-      if (!fs.existsSync(outputDir)) {
-        fs.mkdirSync(outputDir, { recursive: true });
-      }
-
-      spinner.text = "Extracting schema metadata...";
-      const { models, enums } = await extractSchema(finalSchemaPath);
-      spinner.succeed("Schema metadata extracted.");
-
-      if (config.generateMetadata) {
-        spinner.start("Writing metadata.json...");
-        fs.writeFileSync(
-          metadataOutputPath,
-          JSON.stringify({ models, enums }, null, 2),
-          "utf-8"
-        );
-        spinner.succeed(
-          `Metadata successfully extracted to ${metadataOutputPath}`
-        );
-      } else {
-        spinner.succeed(
-          "Schema metadata extracted (metadata generation disabled)."
-        );
-      }
-
-      spinner.start("Generating TypeScript interfaces...");
-      const tsContent = generateTsInterfaces(models, enums, options.config);
-      fs.writeFileSync(finalTsOutputPath, tsContent, "utf-8");
-      spinner.succeed(
-        `TypeScript interfaces successfully generated at ${finalTsOutputPath}`
-      );
-    } catch (error) {
-      spinner.fail("An error occurred");
-      console.error(error);
-      process.exit(1);
-    }
+    // Run the main logic
+    await runExtractor({
+      schemaPath,
+      tsOutputPath,
+      configPath: options.config,
+    });
   });
 
 program.parse(process.argv);
-
-// If no arguments provided, try to run with config values
-if (process.argv.length === 2) {
-  (async () => {
-    try {
-      const config = loadConfig();
-      if (config.prismaSchema && config.outputFile) {
-        // We have config values, run the extraction automatically
-        console.log(`>>> SC Prisma Extractor - Version: ${version} <<<\n`);
-
-        const spinner = ora("Starting schema extraction...").start();
-        const outputDir = path.dirname(config.outputFile);
-        const metadataOutputPath = path.join(outputDir, "metadata.json");
-
-        spinner.text = "Ensuring output directory exists...";
-        if (!fs.existsSync(outputDir)) {
-          fs.mkdirSync(outputDir, { recursive: true });
-        }
-
-        spinner.text = "Extracting schema metadata...";
-        const { models, enums } = await extractSchema(config.prismaSchema);
-        spinner.succeed("Schema metadata extracted.");
-
-        if (config.generateMetadata) {
-          spinner.start("Writing metadata.json...");
-          fs.writeFileSync(
-            metadataOutputPath,
-            JSON.stringify({ models, enums }, null, 2),
-            "utf-8"
-          );
-          spinner.succeed(
-            `Metadata successfully extracted to ${metadataOutputPath}`
-          );
-        } else {
-          spinner.succeed(
-            "Schema metadata extracted (metadata generation disabled)."
-          );
-        }
-
-        spinner.start("Generating TypeScript interfaces...");
-        const tsContent = generateTsInterfaces(models, enums);
-        fs.writeFileSync(config.outputFile, tsContent, "utf-8");
-        spinner.succeed(
-          `TypeScript interfaces successfully generated at ${config.outputFile}`
-        );
-
-        process.exit(0); // Exit successfully
-      }
-    } catch (error) {
-      console.error(
-        "🟥 Could not run with config:",
-        error instanceof Error ? error.message : String(error)
-      );
-    }
-
-    // If we can't run with config, show help
-    program.help();
-  })();
-}

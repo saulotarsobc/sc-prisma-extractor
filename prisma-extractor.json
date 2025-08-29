@@ -1,5 +1,5 @@
 {
-  "$schema": "./prisma-extractor.schema.json",
+  "$schema": "https://raw.githubusercontent.com/saulotarsobc/sc-prisma-extractor/refs/heads/master/prisma-extractor.schema.json",
   "outputType": "interface",
   "enumOutputType": "type",
   "outputFile": "./dev/database.ts",
