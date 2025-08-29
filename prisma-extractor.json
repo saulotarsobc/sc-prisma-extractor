@@ -1,0 +1,15 @@
+{
+  "mapTypes": {
+    "String": "string",
+    "Int": "number",
+    "Float": "number",
+    "BigInt": "bigint",
+    "Boolean": "boolean",
+    "DateTime": "Date",
+    "Json": "string",
+    "Decimal": "number",
+    "Bytes": "Buffer",
+    "Unsupported": "unknown"
+  },
+  "outputType": "interface"
+}

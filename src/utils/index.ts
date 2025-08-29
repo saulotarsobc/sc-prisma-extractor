@@ -9,6 +9,7 @@ import type { SchemaInformation } from "../interfaces";
  */
 export interface PrismaExtractorConfig {
   mapTypes: Record<string, string>;
+  outputType: "type" | "interface";
 }
 
 /**
@@ -46,6 +47,7 @@ export function loadConfig(configPath?: string): PrismaExtractorConfig {
           ...DEFAULT_TYPE_MAPPINGS,
           ...userConfig.mapTypes,
         },
+        outputType: userConfig.outputType || "interface",
       };
     } catch (error) {
       console.warn("⚠️  Failed to load config file, using defaults:", error);
@@ -54,6 +56,7 @@ export function loadConfig(configPath?: string): PrismaExtractorConfig {
 
   return {
     mapTypes: DEFAULT_TYPE_MAPPINGS,
+    outputType: "interface",
   };
 }
 
@@ -65,6 +68,7 @@ export function generateConfigFile(configPath?: string): void {
     configPath || resolve(process.cwd(), "prisma-extractor.json");
   const defaultConfig: PrismaExtractorConfig = {
     mapTypes: DEFAULT_TYPE_MAPPINGS,
+    outputType: "interface",
   };
 
   try {
@@ -138,9 +142,11 @@ export function generateTsInterfaces(
 `;
   });
 
-  // Generate Interfaces
+  // Generate Interfaces or Types
   models.forEach((model: DMMF.Model) => {
-    content += `export interface ${model.name} {
+    const keyword = config.outputType === "type" ? "type" : "interface";
+    const separator = config.outputType === "type" ? " =" : "";
+    content += `export ${keyword} ${model.name}${separator} {
 `;
     model.fields.forEach((field: DMMF.Field) => {
       const tsType = mapPrismaTypeToTsType(field.type, config);

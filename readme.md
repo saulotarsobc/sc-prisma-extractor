@@ -4,9 +4,9 @@ A simple CLI tool to extract your Prisma schema into usable TypeScript interface
 
 ## Features
 
-- Generates clean TypeScript `interface` and `enum` definitions from your `schema.prisma` file.
+- Generates clean TypeScript `interface` or `type` definitions from your `schema.prisma` file.
 - Creates a `metadata.json` file with the full, detailed DMMF structure for advanced use cases.
-- Easy-to-use command-line interface.
+- Easy-to-use command-line interface with configurable output types.
 
 ## Installation
 
@@ -76,7 +76,10 @@ This will generate a `prisma-extractor.json` file in your current directory with
 
 ### Configuration File Structure
 
-The configuration file (`prisma-extractor.json`) contains a `mapTypes` object that maps Prisma types to TypeScript types:
+The configuration file (`prisma-extractor.json`) contains two main options:
+
+- `mapTypes`: Maps Prisma types to TypeScript types
+- `outputType`: Choose between generating TypeScript `interface` or `type` definitions (default: `"interface"`)
 
 ```json
 {
@@ -90,13 +93,14 @@ The configuration file (`prisma-extractor.json`) contains a `mapTypes` object th
     "Json": "string",
     "Decimal": "number",
     "Bytes": "Buffer"
-  }
+  },
+  "outputType": "interface"
 }
 ```
 
-### Customizing Type Mappings
+### Customizing Type Mappings and Output
 
-You can modify the `mapTypes` object to customize how Prisma types are converted to TypeScript types. For example, if you prefer to use `string` for JSON fields instead of the default `string`, or if you want to use a custom type for certain fields:
+You can modify both the `mapTypes` object and the `outputType` option:
 
 ```json
 {
@@ -110,9 +114,15 @@ You can modify the `mapTypes` object to customize how Prisma types are converted
     "Json": "any",
     "Decimal": "number",
     "Bytes": "Uint8Array"
-  }
+  },
+  "outputType": "type"
 }
 ```
+
+The `outputType` option accepts:
+
+- `"interface"` (default): Generates `export interface ModelName { ... }`
+- `"type"`: Generates `export type ModelName = { ... }`
 
 ### Using a Custom Configuration File
 
@@ -172,7 +182,7 @@ model Post {
 }
 ```
 
-**After (in `src/generated/types.ts`):**
+**After (in `src/generated/types.ts` with `outputType: "interface"`):**
 
 ```typescript
 export enum Role {
@@ -198,6 +208,34 @@ export interface Post {
   authorId: string;
   createdAt: Date;
 }
+```
+
+**Or with `outputType: "type"`:**
+
+```typescript
+export enum Role {
+  USER = "USER",
+  ADMIN = "ADMIN",
+}
+
+export type User = {
+  id: string;
+  email: string;
+  name: string | null;
+  role: Role;
+  posts: Post[];
+  createdAt: Date;
+};
+
+export type Post = {
+  id: string;
+  title: string;
+  content: string | null;
+  published: boolean;
+  author: User;
+  authorId: string;
+  createdAt: Date;
+};
 ```
 
 ### Metadata (`metadata.json`)

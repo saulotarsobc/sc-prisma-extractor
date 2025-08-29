@@ -30,21 +30,21 @@ enum Role {
  * }
  */
 
-model Example {
-  id          String                                     @id @default(cuid())
-  BigInt      BigInt
-  Boolean     Boolean
-  Bytes       Bytes
-  DateTime    DateTime
-  Decimal     Decimal
-  Float       Float
-  Int         Int
-  Json        Json
-  String      String
-  Unsupported Unsupported("This is an unsupported type") // Custom unsupported type for testing
+// model Example {
+//   id          String                                     @id @default(cuid())
+//   BigInt      BigInt
+//   Boolean     Boolean
+//   Bytes       Bytes
+//   DateTime    DateTime
+//   Decimal     Decimal
+//   Float       Float
+//   Int         Int
+//   Json        Json
+//   String      String
+//   Unsupported Unsupported("This is an unsupported type") // Custom unsupported type for testing
 
-  @@map("examples")
-}
+//   @@map("examples")
+// }
 
 model User {
   id         String   @id @default(cuid())
