@@ -1,14 +1,14 @@
 {
-  "$schema": "https://raw.githubusercontent.com/saulotarsobc/sc-prisma-extractor/refs/heads/master/prisma-extractor.schema.json",
+  "$schema": "./prisma-extractor.schema.json",
   "outputType": "interface",
-  "outputFile": "./src/interfaces/database.ts",
+  "outputFile": "./dev/database.ts",
   "prismaSchema": "./prisma/schema.prisma",
   "generateMetadata": false,
   "mapTypes": {
     "String": "string",
     "Int": "number",
     "Float": "number",
-    "BigInt": "BigInt",
+    "BigInt": "bigint",
     "Boolean": "boolean",
     "DateTime": "Date",
     "Json": "string",
