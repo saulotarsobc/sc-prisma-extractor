@@ -1,10 +1,10 @@
 {
   "$schema": "https://raw.githubusercontent.com/saulotarsobc/sc-prisma-extractor/refs/heads/master/prisma-extractor.schema.json",
-  "outputType": "type",
-  "enumOutputType": "type",
+  "outputType": "interface",
+  "enumOutputType": "enum",
   "outputFile": "./dev/database.ts",
   "prismaSchema": "./prisma/schema.prisma",
-  "generateMetadata": false,
+  "generateMetadata": true,
   "relationFieldsOptional": true,
   "mapTypes": {
     "String": "string",
