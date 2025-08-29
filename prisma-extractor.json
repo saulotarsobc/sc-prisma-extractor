@@ -5,6 +5,7 @@
   "outputFile": "./dev/database.ts",
   "prismaSchema": "./prisma/schema.prisma",
   "generateMetadata": false,
+  "relationFieldsOptional": true,
   "mapTypes": {
     "String": "string",
     "Int": "number",

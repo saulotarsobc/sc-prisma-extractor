@@ -132,7 +132,7 @@ export function loadConfig(configPath?: string): PrismaExtractorConfig {
         outputFile: userConfig.outputFile || "./src/interfaces/database.ts",
         prismaSchema: userConfig.prismaSchema || "./prisma/schema.prisma",
         generateMetadata: userConfig.generateMetadata ?? false,
-  relationFieldsOptional: userConfig.relationFieldsOptional ?? true,
+        relationFieldsOptional: userConfig.relationFieldsOptional ?? true,
         mapTypes: {
           ...DEFAULT_TYPE_MAPPINGS,
           ...userConfig.mapTypes,
@@ -153,7 +153,7 @@ export function loadConfig(configPath?: string): PrismaExtractorConfig {
     outputFile: "./src/interfaces/database.ts",
     prismaSchema: "./prisma/schema.prisma",
     generateMetadata: false,
-  relationFieldsOptional: true,
+    relationFieldsOptional: true,
     mapTypes: DEFAULT_TYPE_MAPPINGS,
   };
 }
@@ -171,7 +171,7 @@ export function generateConfigFile(configPath?: string): void {
     outputFile: "./src/interfaces/database.ts",
     prismaSchema: "./prisma/schema.prisma",
     generateMetadata: false,
-  relationFieldsOptional: true,
+    relationFieldsOptional: true,
     mapTypes: DEFAULT_TYPE_MAPPINGS,
   };
 
