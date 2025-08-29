@@ -8,7 +8,7 @@ import {
   extractSchema,
   generateConfigFile,
   generateTsInterfaces,
-} from "./utils/index";
+} from "./utils";
 
 const program = new Command();
 

@@ -2,7 +2,7 @@ import type { DMMF } from "@prisma/generator-helper";
 import { getDMMF } from "@prisma/internals";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { SchemaInformation } from "../interfaces";
+import type { SchemaInformation } from "../interfaces";
 
 /**
  * Configuration interface for type mappings
