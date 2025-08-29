@@ -8,6 +8,7 @@ import {
   extractSchema,
   generateConfigFile,
   generateTsInterfaces,
+  loadConfig,
 } from "./utils";
 
 const program = new Command();
@@ -53,18 +54,33 @@ program
     }
 
     // Check if required arguments are provided
-    if (!schemaPath || !tsOutputPath) {
-      console.error(
-        "🟥 Error: Both schema-path and ts-output-path are required when not using --init"
-      );
-      program.help();
-      process.exit(1);
+    if (!schemaPath && !tsOutputPath) {
+      // Try to load config to see if we have defaults
+      try {
+        const config = loadConfig(options.config);
+        if (!config.prismaSchema || !config.outputFile) {
+          throw new Error("Missing required paths in config");
+        }
+        // If we have config values, we can proceed without arguments
+      } catch (error) {
+        console.error(
+          "🟥 Error: Both schema-path and ts-output-path are required, or configure them in prisma-extractor.json"
+        );
+        program.help();
+        process.exit(1);
+      }
     }
 
     console.log(`>>> SC Prisma Extractor - Version: ${version} <<<\n`);
 
     const spinner = ora("Starting schema extraction...").start();
-    const outputDir = path.dirname(tsOutputPath);
+
+    // Load config to get default paths
+    const config = loadConfig(options.config);
+    const finalSchemaPath = schemaPath || config.prismaSchema;
+    const finalTsOutputPath = tsOutputPath || config.outputFile;
+
+    const outputDir = path.dirname(finalTsOutputPath);
     const metadataOutputPath = path.join(outputDir, "metadata.json");
 
     try {
@@ -74,7 +90,7 @@ program
       }
 
       spinner.text = "Extracting schema metadata...";
-      const { models, enums } = await extractSchema(schemaPath);
+      const { models, enums } = await extractSchema(finalSchemaPath);
       spinner.succeed("Schema metadata extracted.");
 
       spinner.start("Writing metadata.json...");
@@ -89,9 +105,9 @@ program
 
       spinner.start("Generating TypeScript interfaces...");
       const tsContent = generateTsInterfaces(models, enums, options.config);
-      fs.writeFileSync(tsOutputPath, tsContent, "utf-8");
+      fs.writeFileSync(finalTsOutputPath, tsContent, "utf-8");
       spinner.succeed(
-        `TypeScript interfaces successfully generated at ${tsOutputPath}`
+        `TypeScript interfaces successfully generated at ${finalTsOutputPath}`
       );
     } catch (error) {
       spinner.fail("An error occurred");
@@ -102,6 +118,55 @@ program
 
 program.parse(process.argv);
 
-if (process.argv.length < 3) {
-  program.help();
+// If no arguments provided, try to run with config values
+if (process.argv.length === 2) {
+  (async () => {
+    try {
+      const config = loadConfig();
+      if (config.prismaSchema && config.outputFile) {
+        // We have config values, run the extraction automatically
+        console.log(`>>> SC Prisma Extractor - Version: ${version} <<<\n`);
+
+        const spinner = ora("Starting schema extraction...").start();
+        const outputDir = path.dirname(config.outputFile);
+        const metadataOutputPath = path.join(outputDir, "metadata.json");
+
+        spinner.text = "Ensuring output directory exists...";
+        if (!fs.existsSync(outputDir)) {
+          fs.mkdirSync(outputDir, { recursive: true });
+        }
+
+        spinner.text = "Extracting schema metadata...";
+        const { models, enums } = await extractSchema(config.prismaSchema);
+        spinner.succeed("Schema metadata extracted.");
+
+        spinner.start("Writing metadata.json...");
+        fs.writeFileSync(
+          metadataOutputPath,
+          JSON.stringify({ models, enums }, null, 2),
+          "utf-8"
+        );
+        spinner.succeed(
+          `Metadata successfully extracted to ${metadataOutputPath}`
+        );
+
+        spinner.start("Generating TypeScript interfaces...");
+        const tsContent = generateTsInterfaces(models, enums);
+        fs.writeFileSync(config.outputFile, tsContent, "utf-8");
+        spinner.succeed(
+          `TypeScript interfaces successfully generated at ${config.outputFile}`
+        );
+
+        process.exit(0); // Exit successfully
+      }
+    } catch (error) {
+      console.error(
+        "🟥 Could not run with config:",
+        error instanceof Error ? error.message : String(error)
+      );
+    }
+
+    // If we can't run with config, show help
+    program.help();
+  })();
 }

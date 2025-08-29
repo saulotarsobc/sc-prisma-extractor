@@ -7,6 +7,18 @@
       "type": "string",
       "title": "$schema"
     },
+    "outputFile": {
+      "description": "The output typescript file path",
+      "default": "./src/interfaces/database.ts",
+      "type": "string",
+      "title": "outputFile"
+    },
+    "prismaSchema": {
+      "description": "The Prisma schema file path",
+      "default": "./prisma/schema.prisma",
+      "type": "string",
+      "title": "prismaSchema"
+    },
     "mapTypes": {
       "description": "Maps Prisma model names to TypeScript interfaces",
       "examples": [
@@ -28,104 +40,69 @@
         "String": {
           "description": "String - Maps Prisma model names to TypeScript types",
           "default": "string",
-          "type": [
-            "string",
-            "number"
-          ],
+          "type": ["string", "number"],
           "title": "String"
         },
         "Int": {
           "description": "Int - Maps Prisma model names to TypeScript types",
           "default": "string",
-          "enum": [
-            "number",
-            "string"
-          ],
+          "enum": ["number", "string"],
           "type": "string",
           "title": "Int"
         },
         "Float": {
           "description": "Float - Maps Prisma model names to TypeScript types",
           "default": "string",
-          "enum": [
-            "number",
-            "string"
-          ],
+          "enum": ["number", "string"],
           "type": "string",
           "title": "Float"
         },
         "BigInt": {
           "description": "BigInt - Maps Prisma model names to TypeScript types",
           "default": "string",
-          "enum": [
-            "BigInt",
-            "number",
-            "string"
-          ],
+          "enum": ["BigInt", "number", "string"],
           "type": "string",
           "title": "BigInt"
         },
         "Boolean": {
           "description": "Boolean - Maps Prisma model names to TypeScript types",
           "default": "string",
-          "enum": [
-            "boolean",
-            "number",
-            "string"
-          ],
+          "enum": ["boolean", "number", "string"],
           "type": "string",
           "title": "Boolean"
         },
         "DateTime": {
           "description": "DateTime - Maps Prisma model names to TypeScript types",
           "default": "string",
-          "enum": [
-            "Date",
-            "string"
-          ],
+          "enum": ["Date", "string"],
           "type": "string",
           "title": "DateTime"
         },
         "Json": {
           "description": "Json - Maps Prisma model names to TypeScript types",
           "default": "string",
-          "enum": [
-            "any",
-            "object",
-            "string",
-            "unknown"
-          ],
+          "enum": ["any", "object", "string", "unknown"],
           "type": "string",
           "title": "Json"
         },
         "Decimal": {
           "description": "Decimal - Maps Prisma model names to TypeScript types",
           "default": "string",
-          "enum": [
-            "number",
-            "string"
-          ],
+          "enum": ["number", "string"],
           "type": "string",
           "title": "Decimal"
         },
         "Bytes": {
           "description": "Bytes - Maps Prisma model names to TypeScript types",
           "default": "string",
-          "enum": [
-            "Buffer",
-            "string"
-          ],
+          "enum": ["Buffer", "string"],
           "type": "string",
           "title": "Bytes"
         },
         "Unsupported": {
           "description": "Unsupported - Maps Prisma model names to TypeScript types",
           "default": "string",
-          "enum": [
-            "any",
-            "string",
-            "unknown"
-          ],
+          "enum": ["any", "string", "unknown"],
           "type": "string",
           "title": "Unsupported"
         }
@@ -136,13 +113,8 @@
     },
     "outputType": {
       "description": "The output type determines how the generated schema will be represented.",
-      "examples": [
-        "interface"
-      ],
-      "enum": [
-        "interface",
-        "type"
-      ],
+      "examples": ["interface"],
+      "enum": ["interface", "type"],
       "type": "string",
       "title": "outputType"
     }
@@ -152,7 +124,9 @@
   "required": [
     "$schema",
     "mapTypes",
-    "outputType"
+    "outputFile",
+    "outputType",
+    "prismaSchema"
   ],
   "$schema": "http://json-schema.org/draft-07/schema#"
 }

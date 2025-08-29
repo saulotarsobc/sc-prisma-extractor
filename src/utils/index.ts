@@ -2,14 +2,18 @@ import type { DMMF } from "@prisma/generator-helper";
 import { getDMMF } from "@prisma/internals";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { SCHEMA_URL } from "../constants";
 import type { SchemaInformation } from "../interfaces";
 
 /**
  * Configuration interface for type mappings
  */
 export interface PrismaExtractorConfig {
+  $schema: string;
   mapTypes: Record<string, string>;
   outputType: "type" | "interface";
+  outputFile: string;
+  prismaSchema: string;
 }
 
 /**
@@ -42,7 +46,13 @@ export function validateConfig(
   }
 
   // Check for unexpected properties
-  const allowedKeys = ["mapTypes", "outputType", "$schema"];
+  const allowedKeys = [
+    "mapTypes",
+    "outputType",
+    "outputFile",
+    "prismaSchema",
+    "$schema",
+  ];
   for (const key in config) {
     if (!allowedKeys.includes(key)) {
       errors.push(`Propriedade inesperada: ${key}.`);
@@ -61,7 +71,7 @@ const DEFAULT_TYPE_MAPPINGS: Record<string, string> = {
   String: "string",
   Int: "number",
   Float: "number",
-  BigInt: "bigint",
+  BigInt: "BigInt",
   Boolean: "boolean",
   DateTime: "Date",
   Json: "string",
@@ -93,6 +103,9 @@ export function loadConfig(configPath?: string): PrismaExtractorConfig {
           ...userConfig.mapTypes,
         },
         outputType: userConfig.outputType || "interface",
+        outputFile: userConfig.outputFile || "./src/interfaces/database.ts",
+        prismaSchema: userConfig.prismaSchema || "./prisma/schema.prisma",
+        $schema: SCHEMA_URL,
       };
     } catch (error) {
       console.error("🟥 Failed to load or validate config file:", error);
@@ -105,6 +118,9 @@ export function loadConfig(configPath?: string): PrismaExtractorConfig {
   return {
     mapTypes: DEFAULT_TYPE_MAPPINGS,
     outputType: "interface",
+    outputFile: "./src/interfaces/database.ts",
+    prismaSchema: "./prisma/schema.prisma",
+    $schema: SCHEMA_URL,
   };
 }
 
@@ -117,6 +133,9 @@ export function generateConfigFile(configPath?: string): void {
   const defaultConfig: PrismaExtractorConfig = {
     mapTypes: DEFAULT_TYPE_MAPPINGS,
     outputType: "interface",
+    outputFile: "./src/interfaces/database.ts",
+    prismaSchema: "./prisma/schema.prisma",
+    $schema: SCHEMA_URL,
   };
 
   try {
