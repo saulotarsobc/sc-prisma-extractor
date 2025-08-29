@@ -26,6 +26,14 @@
       "type": "string",
       "title": "outputType"
     },
+    "enumOutputType": {
+      "description": "The output type determines how the generated enums will be represented.",
+      "examples": ["enum"],
+      "enum": ["enum", "type"],
+      "type": "string",
+      "title": "enumOutputType",
+      "default": "enum"
+    },
     "mapTypes": {
       "description": "Maps Prisma model names to TypeScript interfaces",
       "examples": [

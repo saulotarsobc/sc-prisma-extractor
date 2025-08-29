@@ -1,6 +1,7 @@
 {
   "$schema": "./prisma-extractor.schema.json",
   "outputType": "interface",
+  "enumOutputType": "type",
   "outputFile": "./dev/database.ts",
   "prismaSchema": "./prisma/schema.prisma",
   "generateMetadata": false,

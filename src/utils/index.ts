@@ -11,6 +11,7 @@ import type { SchemaInformation } from "../interfaces";
 export interface PrismaExtractorConfig {
   $schema: string;
   outputType: "type" | "interface";
+  enumOutputType: "enum" | "type";
   outputFile: string;
   prismaSchema: string;
   generateMetadata: boolean;
@@ -46,10 +47,23 @@ export function validateConfig(
     );
   }
 
+  // Validate enumOutputType
+  const validEnumOutputTypes = ["enum", "type"];
+  if (!config.enumOutputType || typeof config.enumOutputType !== "string") {
+    errors.push("enumOutputType must be a string.");
+  } else if (!validEnumOutputTypes.includes(config.enumOutputType)) {
+    errors.push(
+      `enumOutputType must be one of the following: ${validEnumOutputTypes.join(
+        ", "
+      )}.`
+    );
+  }
+
   // Check for unexpected properties
   const allowedKeys = [
     "mapTypes",
     "outputType",
+    "enumOutputType",
     "outputFile",
     "prismaSchema",
     "generateMetadata",
@@ -102,6 +116,7 @@ export function loadConfig(configPath?: string): PrismaExtractorConfig {
       return {
         $schema: SCHEMA_URL,
         outputType: userConfig.outputType || "interface",
+        enumOutputType: userConfig.enumOutputType || "enum",
         outputFile: userConfig.outputFile || "./src/interfaces/database.ts",
         prismaSchema: userConfig.prismaSchema || "./prisma/schema.prisma",
         generateMetadata: userConfig.generateMetadata ?? false,
@@ -121,6 +136,7 @@ export function loadConfig(configPath?: string): PrismaExtractorConfig {
   return {
     $schema: SCHEMA_URL,
     outputType: "interface",
+    enumOutputType: "enum",
     outputFile: "./src/interfaces/database.ts",
     prismaSchema: "./prisma/schema.prisma",
     generateMetadata: false,
@@ -137,6 +153,7 @@ export function generateConfigFile(configPath?: string): void {
   const defaultConfig: PrismaExtractorConfig = {
     $schema: SCHEMA_URL,
     outputType: "interface",
+    enumOutputType: "enum",
     outputFile: "./src/interfaces/database.ts",
     prismaSchema: "./prisma/schema.prisma",
     generateMetadata: false,
@@ -203,15 +220,24 @@ export function generateTsInterfaces(
 
   // Generate Enums
   enums.forEach((enumDef: DMMF.DatamodelEnum) => {
-    content += `export enum ${enumDef.name} {
-`;
-    enumDef.values.forEach((value: DMMF.EnumValue) => {
-      content += `  ${value.name} = "${value.name}",
-`;
-    });
-    content += `}
+    if (config.enumOutputType === "type") {
+      const values = enumDef.values
+        .map((value: DMMF.EnumValue) => `"${value.name}"`)
+        .join(" | ");
+      content += `export type ${enumDef.name} = ${values};
 
 `;
+    } else {
+      content += `export enum ${enumDef.name} {
+`;
+      enumDef.values.forEach((value: DMMF.EnumValue) => {
+        content += `  ${value.name} = "${value.name}",
+`;
+      });
+      content += `}
+
+`;
+    }
   });
 
   // Generate Interfaces or Types
