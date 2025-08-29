@@ -30,11 +30,23 @@ The extractor requires two arguments: the path to your Prisma schema and the des
 npx sc-prisma-extractor <path-to-schema.prisma> <path-to-output.ts>
 ```
 
+### Command Line Options
+
+- `--init`: Generate a default configuration file (`prisma-extractor.json`) in the current directory
+- `--config <path>`: Specify a custom path for the configuration file (default: `./prisma-extractor.json`)
+
 ### Example
 
 If you have a schema at `./prisma/schema.prisma` and you want to generate types into `src/generated/types.ts`, you would run:
 
 ```bash
+npx sc-prisma-extractor ./prisma/schema.prisma ./src/generated/types.ts
+```
+
+To generate a configuration file first:
+
+```bash
+npx sc-prisma-extractor --init
 npx sc-prisma-extractor ./prisma/schema.prisma ./src/generated/types.ts
 ```
 
@@ -48,13 +60,80 @@ For a more robust workflow, add the command to your `package.json` scripts. This
 }
 ```
 
-Now, you can simply run:
+## Configuration
+
+SC Prisma Extractor supports customizable type mappings through a configuration file. This allows you to override the default Prisma-to-TypeScript type conversions according to your project's needs.
+
+### Generating a Configuration File
+
+To create a default configuration file, use the `--init` flag:
 
 ```bash
-npm run prisma:generate-types
+npx sc-prisma-extractor --init
 ```
 
-## Output Explained
+This will generate a `prisma-extractor.json` file in your current directory with the default type mappings.
+
+### Configuration File Structure
+
+The configuration file (`prisma-extractor.json`) contains a `mapTypes` object that maps Prisma types to TypeScript types:
+
+```json
+{
+  "mapTypes": {
+    "String": "string",
+    "Int": "number",
+    "Float": "number",
+    "BigInt": "bigint",
+    "Boolean": "boolean",
+    "DateTime": "Date",
+    "Json": "string",
+    "Decimal": "number",
+    "Bytes": "Buffer"
+  }
+}
+```
+
+### Customizing Type Mappings
+
+You can modify the `mapTypes` object to customize how Prisma types are converted to TypeScript types. For example, if you prefer to use `string` for JSON fields instead of the default `string`, or if you want to use a custom type for certain fields:
+
+```json
+{
+  "mapTypes": {
+    "String": "string",
+    "Int": "number",
+    "Float": "number",
+    "BigInt": "bigint",
+    "Boolean": "boolean",
+    "DateTime": "Date",
+    "Json": "any",
+    "Decimal": "number",
+    "Bytes": "Uint8Array"
+  }
+}
+```
+
+### Using a Custom Configuration File
+
+By default, the tool looks for `prisma-extractor.json` in the current working directory. You can specify a different path using the `--config` option:
+
+```bash
+npx sc-prisma-extractor --config ./config/my-custom-config.json ./prisma/schema.prisma ./src/generated/types.ts
+```
+
+You can also combine `--init` with `--config` to generate the configuration file at a custom location:
+
+```bash
+npx sc-prisma-extractor --init --config ./config/my-custom-config.json
+```
+
+### Configuration Priority
+
+1. If a configuration file is found, its mappings are merged with the defaults
+2. Custom mappings in the config file override the defaults
+3. If no configuration file is found, the tool uses the built-in default mappings
+4. Unknown Prisma types fall back to using the Prisma type name as-is
 
 The command will generate two files in the same directory as your specified output path. For the example `npx sc-prisma-extractor ./prisma/schema.prisma ./src/generated/types.ts`, the output will be:
 

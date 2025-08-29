@@ -4,7 +4,11 @@ import * as fs from "fs";
 import ora from "ora";
 import * as path from "path";
 import { version } from "../package.json";
-import { extractSchema, generateTsInterfaces } from "./utils/index";
+import {
+  extractSchema,
+  generateConfigFile,
+  generateTsInterfaces,
+} from "./utils/index";
 
 const program = new Command();
 
@@ -15,15 +19,48 @@ program
   )
   .version(version)
   .argument(
-    "<schema-path>",
+    "[schema-path]",
     "Path to the Prisma schema file (e.g., ./prisma/schema.prisma)"
   )
   .argument(
-    "<ts-output-path>",
+    "[ts-output-path]",
     "Path to the output TypeScript file (e.g., ./dev/extracted.ts)"
   )
+  .option(
+    "--init",
+    "Generate a default configuration file (prisma-extractor.json) in the current directory"
+  )
+  .option(
+    "--config <path>",
+    "Path to the configuration file (default: ./prisma-extractor.json)"
+  )
   .showHelpAfterError()
-  .action(async (schemaPath, tsOutputPath) => {
+  .action(async (schemaPath, tsOutputPath, options) => {
+    // Handle --init flag
+    if (options.init) {
+      console.log(`>>> SC Prisma Extractor - Version: ${version} <<<\n`);
+      const spinner = ora("Generating configuration file...").start();
+
+      try {
+        generateConfigFile(options.config);
+        spinner.succeed("Configuration file generated successfully!");
+        return;
+      } catch (error) {
+        spinner.fail("Failed to generate configuration file");
+        console.error(error);
+        process.exit(1);
+      }
+    }
+
+    // Check if required arguments are provided
+    if (!schemaPath || !tsOutputPath) {
+      console.error(
+        "🟥 Error: Both schema-path and ts-output-path are required when not using --init"
+      );
+      program.help();
+      process.exit(1);
+    }
+
     console.log(`>>> SC Prisma Extractor - Version: ${version} <<<\n`);
 
     const spinner = ora("Starting schema extraction...").start();
@@ -51,7 +88,7 @@ program
       );
 
       spinner.start("Generating TypeScript interfaces...");
-      const tsContent = generateTsInterfaces(models, enums);
+      const tsContent = generateTsInterfaces(models, enums, options.config);
       fs.writeFileSync(tsOutputPath, tsContent, "utf-8");
       spinner.succeed(
         `TypeScript interfaces successfully generated at ${tsOutputPath}`
