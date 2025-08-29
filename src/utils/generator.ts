@@ -63,7 +63,7 @@ export function generateTsInterfaces(
       if (isOptional) {
         fieldType += " | null";
       }
-      content += `  ${field.name}: ${fieldType};\n`;
+      content += `  ${field.name}${isOptional ? "?" : ""}: ${fieldType};\n`;
     });
     content += `}
 

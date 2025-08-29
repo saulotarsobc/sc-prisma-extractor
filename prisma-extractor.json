@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/saulotarsobc/sc-prisma-extractor/refs/heads/master/prisma-extractor.schema.json",
-  "outputType": "interface",
-  "enumOutputType": "enum",
+  "outputType": "type",
+  "enumOutputType": "type",
   "outputFile": "./dev/database.ts",
   "prismaSchema": "./prisma/schema.prisma",
   "generateMetadata": true,
