@@ -1,6 +1,6 @@
 {
   "name": "sc-prisma-extractor",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "A CLI tool to extract your Prisma schema into usable TypeScript interfaces and a detailed metadata JSON file.",
   "main": "dist/index.js",
   "bin": {
