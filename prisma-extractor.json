@@ -1,4 +1,8 @@
 {
+  "$schema": "https://raw.githubusercontent.com/saulotarsobc/sc-prisma-extractor/refs/heads/master/prisma-extractor.schema.json",
+  "outputType": "interface",
+  "outputFile": "./src/interfaces/database.ts",
+  "prismaSchema": "./prisma/schema.prisma",
   "mapTypes": {
     "String": "string",
     "Int": "number",
@@ -10,9 +14,5 @@
     "Decimal": "number",
     "Bytes": "Buffer",
     "Unsupported": "unknown"
-  },
-  "outputType": "interface",
-  "outputFile": "./src/interfaces/database.ts",
-  "prismaSchema": "./prisma/schema.prisma",
-  "$schema": "https://raw.githubusercontent.com/saulotarsobc/sc-prisma-extractor/refs/heads/master/prisma-extractor.schema.json"
+  }
 }

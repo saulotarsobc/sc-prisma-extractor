@@ -10,10 +10,10 @@ import type { SchemaInformation } from "../interfaces";
  */
 export interface PrismaExtractorConfig {
   $schema: string;
-  mapTypes: Record<string, string>;
   outputType: "type" | "interface";
   outputFile: string;
   prismaSchema: string;
+  mapTypes: Record<string, string>;
 }
 
 /**
@@ -98,14 +98,14 @@ export function loadConfig(configPath?: string): PrismaExtractorConfig {
       validateConfig(userConfig);
 
       return {
+        $schema: SCHEMA_URL,
+        outputType: userConfig.outputType || "interface",
+        outputFile: userConfig.outputFile || "./src/interfaces/database.ts",
+        prismaSchema: userConfig.prismaSchema || "./prisma/schema.prisma",
         mapTypes: {
           ...DEFAULT_TYPE_MAPPINGS,
           ...userConfig.mapTypes,
         },
-        outputType: userConfig.outputType || "interface",
-        outputFile: userConfig.outputFile || "./src/interfaces/database.ts",
-        prismaSchema: userConfig.prismaSchema || "./prisma/schema.prisma",
-        $schema: SCHEMA_URL,
       };
     } catch (error) {
       console.error("🟥 Failed to load or validate config file:", error);
@@ -116,11 +116,11 @@ export function loadConfig(configPath?: string): PrismaExtractorConfig {
   }
 
   return {
-    mapTypes: DEFAULT_TYPE_MAPPINGS,
+    $schema: SCHEMA_URL,
     outputType: "interface",
     outputFile: "./src/interfaces/database.ts",
     prismaSchema: "./prisma/schema.prisma",
-    $schema: SCHEMA_URL,
+    mapTypes: DEFAULT_TYPE_MAPPINGS,
   };
 }
 
@@ -131,11 +131,11 @@ export function generateConfigFile(configPath?: string): void {
   const configFilePath =
     configPath || resolve(process.cwd(), "prisma-extractor.json");
   const defaultConfig: PrismaExtractorConfig = {
-    mapTypes: DEFAULT_TYPE_MAPPINGS,
+    $schema: SCHEMA_URL,
     outputType: "interface",
     outputFile: "./src/interfaces/database.ts",
     prismaSchema: "./prisma/schema.prisma",
-    $schema: SCHEMA_URL,
+    mapTypes: DEFAULT_TYPE_MAPPINGS,
   };
 
   try {
