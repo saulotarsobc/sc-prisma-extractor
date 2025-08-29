@@ -1,29 +1,20 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "SC Prisma Extractor Configuration",
-  "description": "Schema de validação para o arquivo prisma-extractor.json",
+  "description": "Prisma Extractor Interface. By Saulo Costa <https://github.com/saulotarsobc>",
   "type": "object",
   "properties": {
     "$schema": {
+      "description": "The JSON Schema url or path",
       "type": "string",
-      "description": "Referência ao schema JSON para validação"
+      "title": "$schema"
     },
     "mapTypes": {
-      "type": "object",
-      "description": "Mapeamento de tipos Prisma para TypeScript",
-      "patternProperties": {
-        ".*": {
-          "type": "string",
-          "description": "Tipo TypeScript correspondente"
-        }
-      },
-      "additionalProperties": true,
+      "description": "Maps Prisma model names to TypeScript interfaces",
       "examples": [
         {
           "String": "string",
           "Int": "number",
           "Float": "number",
-          "BigInt": "bigint",
+          "BigInt": "BigInt",
           "Boolean": "boolean",
           "DateTime": "Date",
           "Json": "string",
@@ -31,34 +22,137 @@
           "Bytes": "Buffer",
           "Unsupported": "unknown"
         }
-      ]
+      ],
+      "type": "object",
+      "properties": {
+        "String": {
+          "description": "String - Maps Prisma model names to TypeScript types",
+          "default": "string",
+          "type": [
+            "string",
+            "number"
+          ],
+          "title": "String"
+        },
+        "Int": {
+          "description": "Int - Maps Prisma model names to TypeScript types",
+          "default": "string",
+          "enum": [
+            "number",
+            "string"
+          ],
+          "type": "string",
+          "title": "Int"
+        },
+        "Float": {
+          "description": "Float - Maps Prisma model names to TypeScript types",
+          "default": "string",
+          "enum": [
+            "number",
+            "string"
+          ],
+          "type": "string",
+          "title": "Float"
+        },
+        "BigInt": {
+          "description": "BigInt - Maps Prisma model names to TypeScript types",
+          "default": "string",
+          "enum": [
+            "BigInt",
+            "number",
+            "string"
+          ],
+          "type": "string",
+          "title": "BigInt"
+        },
+        "Boolean": {
+          "description": "Boolean - Maps Prisma model names to TypeScript types",
+          "default": "string",
+          "enum": [
+            "boolean",
+            "number",
+            "string"
+          ],
+          "type": "string",
+          "title": "Boolean"
+        },
+        "DateTime": {
+          "description": "DateTime - Maps Prisma model names to TypeScript types",
+          "default": "string",
+          "enum": [
+            "Date",
+            "string"
+          ],
+          "type": "string",
+          "title": "DateTime"
+        },
+        "Json": {
+          "description": "Json - Maps Prisma model names to TypeScript types",
+          "default": "string",
+          "enum": [
+            "any",
+            "object",
+            "string",
+            "unknown"
+          ],
+          "type": "string",
+          "title": "Json"
+        },
+        "Decimal": {
+          "description": "Decimal - Maps Prisma model names to TypeScript types",
+          "default": "string",
+          "enum": [
+            "number",
+            "string"
+          ],
+          "type": "string",
+          "title": "Decimal"
+        },
+        "Bytes": {
+          "description": "Bytes - Maps Prisma model names to TypeScript types",
+          "default": "string",
+          "enum": [
+            "Buffer",
+            "string"
+          ],
+          "type": "string",
+          "title": "Bytes"
+        },
+        "Unsupported": {
+          "description": "Unsupported - Maps Prisma model names to TypeScript types",
+          "default": "string",
+          "enum": [
+            "any",
+            "string",
+            "unknown"
+          ],
+          "type": "string",
+          "title": "Unsupported"
+        }
+      },
+      "defaultProperties": [],
+      "additionalProperties": false,
+      "title": "mapTypes"
     },
     "outputType": {
+      "description": "The output type determines how the generated schema will be represented.",
+      "examples": [
+        "interface"
+      ],
+      "enum": [
+        "interface",
+        "type"
+      ],
       "type": "string",
-      "description": "Tipo de saída para as interfaces geradas",
-      "enum": ["interface", "type"],
-      "default": "interface",
-      "examples": ["interface"]
+      "title": "outputType"
     }
   },
-  "required": ["mapTypes", "outputType"],
+  "defaultProperties": [],
   "additionalProperties": false,
-  "examples": [
-    {
-      "$schema": "./prisma-extractor.schema.json",
-      "mapTypes": {
-        "String": "string",
-        "Int": "number",
-        "Float": "number",
-        "BigInt": "bigint",
-        "Boolean": "boolean",
-        "DateTime": "Date",
-        "Json": "string",
-        "Decimal": "number",
-        "Bytes": "Buffer",
-        "Unsupported": "unknown"
-      },
-      "outputType": "interface"
-    }
-  ]
+  "required": [
+    "$schema",
+    "mapTypes",
+    "outputType"
+  ],
+  "$schema": "http://json-schema.org/draft-07/schema#"
 }
