@@ -13,6 +13,48 @@ export interface PrismaExtractorConfig {
 }
 
 /**
+ * Validates the configuration object structure and values
+ */
+export function validateConfig(
+  config: any
+): asserts config is PrismaExtractorConfig {
+  const errors: string[] = [];
+
+  // Validate mapTypes
+  if (!config.mapTypes || typeof config.mapTypes !== "object") {
+    errors.push("mapTypes need to be an object.");
+  } else {
+    for (const [key, value] of Object.entries(config.mapTypes)) {
+      if (typeof value !== "string") {
+        errors.push(`mapTypes.${key} must be a string.`);
+      }
+    }
+  }
+
+  // Validate outputType
+  const validOutputTypes = ["interface", "type"];
+  if (!config.outputType || typeof config.outputType !== "string") {
+    errors.push("outputType must be a string.");
+  } else if (!validOutputTypes.includes(config.outputType)) {
+    errors.push(
+      `outputType must be one of the following: ${validOutputTypes.join(", ")}.`
+    );
+  }
+
+  // Check for unexpected properties
+  const allowedKeys = ["mapTypes", "outputType", "$schema"];
+  for (const key in config) {
+    if (!allowedKeys.includes(key)) {
+      errors.push(`Propriedade inesperada: ${key}.`);
+    }
+  }
+
+  if (errors.length > 0) {
+    throw new Error(`Invalid configuration: ${errors.join("; ")}`);
+  }
+}
+
+/**
  * Default type mappings from Prisma to TypeScript
  */
 const DEFAULT_TYPE_MAPPINGS: Record<string, string> = {
@@ -42,6 +84,9 @@ export function loadConfig(configPath?: string): PrismaExtractorConfig {
         configContent
       ) as Partial<PrismaExtractorConfig>;
 
+      // Validate the loaded config
+      validateConfig(userConfig);
+
       return {
         mapTypes: {
           ...DEFAULT_TYPE_MAPPINGS,
@@ -50,7 +95,10 @@ export function loadConfig(configPath?: string): PrismaExtractorConfig {
         outputType: userConfig.outputType || "interface",
       };
     } catch (error) {
-      console.warn("⚠️  Failed to load config file, using defaults:", error);
+      console.error("🟥 Failed to load or validate config file:", error);
+      throw new Error(
+        "Could not load configuration file. Please check the file format and content."
+      );
     }
   }
 

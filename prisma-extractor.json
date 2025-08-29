@@ -1,4 +1,5 @@
 {
+  "$schema": "./prisma-extractor.schema.json",
   "mapTypes": {
     "String": "string",
     "Int": "number",

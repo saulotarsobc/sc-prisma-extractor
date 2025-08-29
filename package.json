@@ -10,6 +10,7 @@
     "dev": "nodemon --watch src --watch prisma --ext ts,prisma --exec \"npm run build && npm run start\"",
     "build": "tsc",
     "start": "node dist/index.js ./prisma/schema.prisma ./dev/extracted.ts",
+    "validate-config": "node -e \"const { validateConfig, loadConfig } = require('./dist/utils'); try { validateConfig(loadConfig()); console.log('✅ Configuração válida!'); } catch (error) { console.error('🟥', error.message); process.exit(1); }\"",
     "prepublishOnly": "npm run build",
     "deploy": "npm run build && npm version patch && npm publish"
   },

@@ -1,0 +1,64 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SC Prisma Extractor Configuration",
+  "description": "Schema de validação para o arquivo prisma-extractor.json",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Referência ao schema JSON para validação"
+    },
+    "mapTypes": {
+      "type": "object",
+      "description": "Mapeamento de tipos Prisma para TypeScript",
+      "patternProperties": {
+        ".*": {
+          "type": "string",
+          "description": "Tipo TypeScript correspondente"
+        }
+      },
+      "additionalProperties": true,
+      "examples": [
+        {
+          "String": "string",
+          "Int": "number",
+          "Float": "number",
+          "BigInt": "bigint",
+          "Boolean": "boolean",
+          "DateTime": "Date",
+          "Json": "string",
+          "Decimal": "number",
+          "Bytes": "Buffer",
+          "Unsupported": "unknown"
+        }
+      ]
+    },
+    "outputType": {
+      "type": "string",
+      "description": "Tipo de saída para as interfaces geradas",
+      "enum": ["interface", "type"],
+      "default": "interface",
+      "examples": ["interface"]
+    }
+  },
+  "required": ["mapTypes", "outputType"],
+  "additionalProperties": false,
+  "examples": [
+    {
+      "$schema": "./prisma-extractor.schema.json",
+      "mapTypes": {
+        "String": "string",
+        "Int": "number",
+        "Float": "number",
+        "BigInt": "bigint",
+        "Boolean": "boolean",
+        "DateTime": "Date",
+        "Json": "string",
+        "Decimal": "number",
+        "Bytes": "Buffer",
+        "Unsupported": "unknown"
+      },
+      "outputType": "interface"
+    }
+  ]
+}
